@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>家庭倉儲管理系統</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js 讓 IE8 支援 HTML5 元素與媒體查詢 -->
+    <!-- 警告：Respond.js 無法在 file:// 協定下運作 -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script>
+        var address;
+		var t=1;
+		var usuallypass=false;
+        function getvalue(id) {
+            var y = document.getElementById(id);
+            var addr = y.options[e.selectedIndex].value;
+            console.log(addr);
+        }
+
+
+        $(document).ready(function () {
+            var shortobj = new Array();
+
+            //樓層
+            $(document).on('click', '#floor_btn>button', function () {
+                // alert($("#Addr").val()+$(this).text());
+                var sql = "SELECT Area_id,Area_name FROM `Area` WHERE Address_id = '" + $("#Addr").val() + "' and Floor = '" + $(this).text() + "' ORDER by Area_id"
+                var step = 'step_Area';
+                getAData(sql, step);
+                $("#floor_btn>button").not($("#" + $(this).attr("id"))).css('background-color', 'white');
+                $("#floor_btn>button").not($("#" + $(this).attr("id"))).css('color', 'black');
+                $(this).css('background-color', '#aaa');
+                $(this).css('color', 'white');
+                shortobj[0] = $(this).text();
+                $("#data1").text(shortobj[0]);
+                $("#step2").slideDown();
+            })
+                .on('mouseenter', '#floor_btn>button', function () {
+                    $(this).css('background-color', '#aaa');
+                    $(this).css('color', 'white');
+                })
+                .on('mouseleave', '#floor_btn>button', function () {
+                    if (shortobj[0] != $(this).text()) {
+                        $(this).css('background-color', 'white');
+                        $(this).css('color', 'black');
+                    }
+                });
+            //區域
+            $(document).on('click', '#area_btn>button', function () {
+                $("#area_btn>button").not($("#" + $(this).attr("id"))).css('background-color', 'white');
+                $("#area_btn>button").not($("#" + $(this).attr("id"))).css('color', 'black');
+                $(this).css('background-color', '#aaa');
+                $(this).css('color', 'white');
+                shortobj[1] = $(this).attr("id");
+                $("#data2").text(shortobj[1]);
+                $("#step3").slideDown();
+            })
+                .on('mouseenter', '#area_btn>button', function () {
+                    $(this).css('background-color', '#aaa');
+                    $(this).css('color', 'white');
+                })
+                .on('mouseleave', '#area_btn>button', function () {
+                    if (shortobj[1] != $(this).attr("id")) {
+                        $(this).css('background-color', 'white');
+                        $(this).css('color', 'black');
+                    }
+                });
+			//常用
+			$("#usually_select").change(function(){
+				$("#step9").slideDown();
+				var usuallyarray=new Array();
+				usuallyarray=$("#usually_select option[value='" + $(this).val() + "']").text().split("-");
+				$("#data3").text(usuallyarray[0]);
+				$("#data4").text(usuallyarray[1]);
+				$("#data5").text(usuallyarray[2]);
+				$("#data6").text(usuallyarray[3]);
+				$("#data7").text(usuallyarray[4]);
+				shortobj[5]=$(this).val().split("0")[1];
+				shortobj[6]=usuallyarray[4];
+				usuallypass=false;
+			});
+            //類別
+            $(document).on('click', '#class_btn>button', function () {
+                var sql = "SELECT * FROM `SubClass` WHERE `Class_id` = '" + $(this).val() + "'";
+                var step = 'step_subclass';
+                getAData(sql, step);
+                $("#class_btn>button").not($("#" + $(this).attr("id"))).css('background-color', 'white');
+                $("#class_btn>button").not($("#" + $(this).attr("id"))).css('color', 'black');
+                $(this).css('background-color', '#aaa');
+                $(this).css('color', 'white');
+                shortobj[2] = $(this).val();
+                $("#data3").text(shortobj[2]);
+                $("#step5").slideDown();
+            })
+                .on('mouseenter', '#class_btn>button', function () {
+                    $(this).css('background-color', '#aaa');
+                    $(this).css('color', 'white');
+                })
+                .on('mouseleave', '#class_btn>button', function () {
+                    if (shortobj[2] != $(this).val()) {
+                        $(this).css('background-color', 'white');
+                        $(this).css('color', 'black');
+                    }
+                });
+            //子類別
+            $(document).on('click', '#subclass_btn>button', function () {
+                var sql = "SELECT * FROM `Item` WHERE `SubClass_id` = '" + $(this).val() + "'";
+                var step = 'step_item';
+                getAData(sql, step);
+                $("#subclass_btn>button").not($("#" + $(this).attr("id"))).css('background-color', 'white');
+                $("#subclass_btn>button").not($("#" + $(this).attr("id"))).css('color', 'black');
+                $(this).css('background-color', '#aaa');
+                $(this).css('color', 'white');
+                shortobj[3] = $(this).text();
+                $("#data4").text(shortobj[3]);
+                $("#step6").slideDown();
+            })
+                .on('mouseenter', '#subclass_btn>button', function () {
+                    $(this).css('background-color', '#aaa');
+                    $(this).css('color', 'white');
+                })
+                .on('mouseleave', '#subclass_btn>button', function () {
+                    if (shortobj[3] != $(this).text()) {
+                        $(this).css('background-color', 'white');
+                        $(this).css('color', 'black');
+                    }
+                });
+            //項目
+            $(document).on('click', '#item_btn>button', function () {
+                var sql = "SELECT `Type_id`,`Type_name`,`Item_id` FROM `Type` WHERE `Item_id` =" + $(this).val() + "";
+                var step = 'step_type';
+                getAData(sql, step);
+                $("#item_btn>button").not($("#" + $(this).attr("id"))).css('background-color', 'white');
+                $("#item_btn>button").not($("#" + $(this).attr("id"))).css('color', 'black');
+                $(this).css('background-color', '#aaa');
+                $(this).css('color', 'white');
+                shortobj[4] = $(this).text();
+                $("#data5").text(shortobj[4]);
+                $("#step7").slideDown();
+            })
+                .on('mouseenter', '#item_btn>button', function () {
+                    $(this).css('background-color', '#aaa');
+                    $(this).css('color', 'white');
+                })
+                .on('mouseleave', '#item_btn>button', function () {
+                    if (shortobj[4] != $(this).text()) {
+                        $(this).css('background-color', 'white');
+                        $(this).css('color', 'black');
+                    }
+                });
+			//物品名
+            $("#type_select").change(function () {
+                shortobj[5] = $("#type_select option[value='" + $(this).val() + "']").val();
+                $("#data6").text($("#type_select option[value='" + $(this).val() + "']").text());
+                $("#step8").slideDown();
+				//自動填入備註欄
+				//$("#remark>textarea").val($("#type_select option[value='" + $(this).val() + "']").text()).css("color","#ddd");
+				//shortobj[8] = "'" + $("#type_select option[value='" + $(this).val() + "']").text() + "'";
+            });
+            //等級
+            $("#level_btn>button").on({
+                mouseenter: function () {
+                    $(this).css('background-color', '#aaa');
+                    $(this).css('color', 'white');
+                },
+                mouseleave: function () {
+                    if (shortobj[6] != $(this).text()) {
+                        $(this).css('background-color', 'white');
+                        $(this).css('color', 'black');
+                    }
+                },
+                click: function () {
+                    $("#level_btn>button").not($("#" + $(this).attr("id"))).css('background-color', 'white');
+                    $("#level_btn>button").not($("#" + $(this).attr("id"))).css('color', 'black');
+                    $(this).css('background-color', '#aaa');
+                    $(this).css('color', 'white');
+                    shortobj[6] = $(this).text();
+                    $("#data7").text(shortobj[6]);
+                    $("#step9").slideDown();
+                }
+            });
+            //過期日
+            $("#EXP>input").change(function () {
+                shortobj[7] = "'" + $(this).val() + "'";
+                $("#data8").text($(this).val());
+                $("#step10").slideDown();
+            });
+            //備註
+            $("#remark>textarea").keyup(function () {
+                shortobj[8] = "'" + $(this).val() + "'";
+                $("#data9").text($(this).val());
+                $("#continue").show();
+            });
+            //跳過
+            $(".pass").click(function () {
+				if($(this).attr("id") == "usually"){
+					$("#step4").slideDown();
+					$("#step3").slideUp();
+					usuallypass=true;
+				}
+                else if ($(this).attr("id") == "remarkpass") {
+                    $("#continue").show();
+                    shortobj[8] = "NULL";
+                } else {
+                    shortobj[7] = "NULL";
+                    $("#step10").slideDown();
+
+                }
+            });
+
+            $("#continue").click(function () {
+                $('html, body').scrollTop(0);
+				if(usuallypass){$("#usually_select").append("<option value='"+t+"0"+shortobj[5]+"'>"+shortobj[2]+"-"+shortobj[3]+"-"+shortobj[4]+"-"+$("#data6").text()+"-"+shortobj[6]+"</option>");}
+                for (var x = 1; x < 10; x++) {
+                    $("#data" + x).text("");
+                }
+                for (var i = 2; i < 11; i++) {
+                    $("#step" + i).slideUp();
+                }
+                var sql = "INSERT INTO `Entity` (`Entity_id`, `Type_id`, `Entity_Expired`, `Address_id`, `Floor`, `Area`, `Level`, `Entity_Remark`) VALUES(NULL,'" + shortobj[5] + "'," + shortobj[7] + ",'" + address + "','" + shortobj[0] + "','" + shortobj[1] + "','" + shortobj[6] + "'," + shortobj[8] + ")";
+
+                getAData(sql, 'step_insert');
+				
+                shortobj = new Array();
+                $("#floor_btn>button").css('background-color', 'white').css('color', 'black');
+                $("#class_btn>button").css('background-color', 'white').css('color', 'black');
+                $("#level_btn>button").css('background-color', 'white').css('color', 'black');
+				t++;
+				$("#continue").hide();
+				$("#usually_select").val("first");
+            });
+            $("#Addr").change(function () {
+                $('html, body').scrollTop(0);
+                for (var x = 1; x < 10; x++) {
+                    $("#data" + x).text("");
+                }
+                for (var i = 2; i < 11; i++) {
+                    $("#step" + i).slideUp();
+                }
+            });
+            //登入
+            // $("#account_click").click(function () {
+            //     var sql = "SELECT * FROM `User` WHERE `Account` = '"+$("#account").val()+"'";
+            //     getAData(sql, 'login');
+
+            // });
+        });
+    </script>
+
+</head>
+
+<body onload="getAData('select * from Address','step_addr')">
+    <!--header-->
+    <div class="container-fluid" id="header">
+        <div class="container">
+            <!--menu-->
+            <nav class="navbar navbar-default" role="navigation">
+                <div class="container-fluid">
+                    <!-- Brand and toggle get grouped for better mobile display -->
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
+                        <a class="navbar-brand" href="#">
+                            <div class="logo">家庭倉儲管理系統</div>
+                        </a>
+                    </div>
+
+                    <!-- Collect the nav links, forms, and other content for toggling -->
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="active"><a href="#">首頁</a></li>
+                            <li><a href="CSIT_select.html">快速查詢</a></li>
+                            <li><a href="CSIT_insert.html">新增(管理者)</a></li>
+                            <li><a href="#">帳戶(管理者)</a></li>
+                            <li><a href="AFA_insert.html">區域(區域管理者)</a></li>
+
+                        </ul>
+                    </div>
+                    <!-- /.navbar-collapse -->
+                </div>
+                <!-- /.container-fluid -->
+            </nav>
+            <!--menu end-->
+            <!-- <div id="accpass">
+                帳號:
+                <input type="text" id="account"> 
+                密碼:
+                <input type="password" id="password">
+
+                <button id="account_click">登入</button>
+            </div> -->
+        </div>
+
+    </div>
+    <!--header end -->
+    <div id="login">
+
+
+        <!--banner-->
+        <div class="container-fluid" id="banner">
+            <div class="container">
+                選擇地址:
+                <select name="Addr_select" id="Addr" onchange="getAData('','step_floor')">
+                <option value="">選擇地址</option>
+            </select>
+            </div>
+        </div>
+        <!--banner end-->
+
+        <!--content-->
+        <div class="container-fluid">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-6 col-md-4">
+                        <div class="homeframe">
+                            <div class="caption">
+                                <h2 style="color:#ddd;">步驟1.</h2>
+                                <h3 id="f">樓層</h3>
+                                <div class="autoscroll" id="floor_btn">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4" id="step2" style="display:none;">
+                        <div class="homeframe">
+                            <div class="caption">
+                                <h2 style="color:#ddd;">步驟2.</h2>
+                                <h3>區域</h3>
+                                <div class="autoscroll" id="area_btn">
+                                    <!--<script>
+                                    for (var i = 1; i < 3; i++) {
+
+                                        document.write("<button class='area' id='a" + i + "'>" + i + "</button>")
+
+                                    }
+                                </script>-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+					 <div class="col-sm-6 col-md-4" id="step3" style="display:none;">
+                        <div class="homeframe">
+                            <div class="caption">
+                                <h2>常用</h2>
+                                <p  style="color:#aaa;margin-top:20px;margin-bottom:17px;">*.選擇設定跳至步驟8.</p>
+                                 <div class="btn-group">
+                                    <select id="usually_select" style="width:100%;height:35px;margin-top:55px;border: 2px solid #ddd;margin-bottom:35px;">
+										<option value="first">&lt;選取現有設定&gt;</option>
+									</select>
+									<a class="pass" id="usually">跳過&gt;&gt;</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4" id="step4" style="display:none;">
+                        <div class="homeframe">
+                            <div class="caption">
+                                <h2 style="color:#ddd;">步驟3.</h2>
+                                <h3>類別</h3>
+                                <div class="btn-group" id="class_btn">
+                                    <button class="btn" id="f" value="F">F 固定資產</button>
+                                    <button class="btn" id="c" value="C">C 遞耗資產</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4" id="step5" style="display:none;">
+                        <div class="homeframe">
+                            <div class="caption">
+                                <h2 style="color:#ddd;">步驟4.</h2>
+                                <h3>子類別</h3>
+                                <div class="autoscroll" id="subclass_btn">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4" id="step6" style="display:none;">
+                        <div class="homeframe">
+                            <div class="caption">
+                                <h2 style="color:#ddd;">步驟5.</h2>
+                                <h3>項目</h3>
+                                <div class="autoscroll" id="item_btn">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4" id="step7" style="display:none;">
+                        <div class="homeframe">
+                            <div class="caption">
+                                <h2 style="color:#ddd;">步驟6.</h2>
+                                <h3>物品名</h3>
+                                <div class="btn-group">
+                                    <select id="type_select" style="width:100%;height:35px;margin-top:55px;border: 2px solid #ddd;">
+                                    <option>&lt;選取現有子類別&gt;</option>
+                                    
+                                </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4" id="step8" style="display:none;">
+                        <div class="homeframe">
+                            <div class="caption">
+                                <h2 style="color:#ddd;">步驟7.</h2>
+                                <h3>等級</h3>
+                                <div class="btn-group" id="level_btn">
+                                    <button class="btn1" id="lv1">A</button>
+                                    <button class="btn1" id="lv2">B</button>
+                                    <button class="btn1" id="lv3">C</button>
+                                    <button class="btn1" id="lv4">D</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4" id="step9" style="display:none;">
+                        <div class="homeframe">
+                            <div class="caption">
+                                <h2 style="color:#ddd;">步驟8.</h2>
+                                <h3>過期日</h3>
+                                <div class="btn-group" id="EXP">
+                                    <input type="date" id="Date" value="">
+                                    <a class="pass" id="EXPpass">跳過&gt;&gt;</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-4" id="step10" style="display:none;">
+                        <div class="homeframe">
+                            <div class="caption">
+                                <h2 style="color:#ddd;">步驟9.</h2>
+                                <h3>備註</h3>
+                                <div class="btn-group" id="remark">
+                                    <input type="file" accept="image/*" capture="camera" />
+                                    <textarea></textarea>
+                                    <a class="pass" id="remarkpass">跳過&gt;&gt;</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-8" id="step11">
+                        <div class="homeframe">
+                            <div class="caption">
+                                <h2>檢視</h2>
+                                <div id="show">
+                                    <div>
+                                        <table>
+                                            <tr>
+                                                <th>樓層</th>
+                                                <th>區域</th>
+                                                <th>類別</th>
+                                                <th>子類別</th>
+                                                <th>項目</th>
+                                                <th>物品</th>
+                                                <th>等級</th>
+                                                <th>過期日</th>
+                                                <th>備註</th>
+                                            </tr>
+                                            <tr>
+                                                <td id="data1"></td>
+                                                <td id="data2"></td>
+                                                <td id="data3"></td>
+                                                <td id="data4"></td>
+                                                <td id="data5"></td>
+                                                <td id="data6"></td>
+                                                <td id="data7"></td>
+                                                <td id="data8"></td>
+                                                <td id="data9"></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <button id="continue">繼續新增</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--content end-->
+    <!--footer-->
+    <div class="container-fluid" id="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-md-2">
+                    123
+                </div>
+                <div class="col-xs-12 col-md-2">
+                    456
+                </div>
+                <div class="col-xs-12 col-md-2">
+                    789
+                </div>
+                <div class="col-xs-12 col-md-5 col-md-offset-1">
+                    <h1>1111</h1>
+                    <p>13579</p>
+                </div>
+            </div>
+        </div>
+
+        <!--footer end-->
+        <!-- jQuery (Bootstrap 所有外掛均需要使用) -->
+        <script src="js/jquery.min.js"></script>
+        <!-- 依需要參考已編譯外掛版本（如下），或各自獨立的外掛版本 -->
+        <script src="js/bootstrap.min.js"></script>
+        <script>
+            //Ajax抓資料============================================================
+            function getAData(sql, step) {
+                console.log($("#Addr").val());
+                address = $("#Addr").val();
+
+                if (sql.length == 0) {
+                    if (step == 'step_floor') {
+                        sql = "SELECT DISTINCT Floor FROM `Area` WHERE Address_id ='" + $("#Addr").val() + "' order by Floor";
+                    } if (step == 'step_Area') {
+                    }
+                }
+
+                var xmlhttp;
+                //判斷瀏覽器 選擇物件
+                if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+                    xmlhttp = new XMLHttpRequest();
+                }
+                else {// code for IE6, IE5
+                    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                }
+                //開啟監聽 確認資料是否傳回
+                xmlhttp.onreadystatechange = function () {
+                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                        if (step != 'step_insert')
+                            var obj = JSON.parse(xmlhttp.responseText);
+                        if (step == 'step_addr') {
+                            obj_addr_fc(obj);
+                        } else if (step == 'step_floor') {
+                            obj_floor_fc(obj);
+                        } else if (step == 'step_Area') {
+                            obj_Area_fc(obj);
+                        } else if (step == 'step_subclass') {
+                            obj_SubClass_fc(obj);
+                        } else if (step == 'step_item') {
+                            obj_Item_fc(obj);
+                        } else if (step == 'step_type') {
+                            obj_Type_fc(obj);
+                        } else if (step == 'step_insert') {
+                            alert(xmlhttp.responseText);
+                        }else if (step == 'login') {
+                            obj_login_fc(obj);
+                        }
+                    }
+                }
+
+                if (step == 'step_subclass' || step == 'step_item' || step == 'step_type')
+                    xmlhttp.open("GET", "Home_json.php?sql=" + sql, true);
+                else if (step == 'step_insert')
+                    xmlhttp.open("GET", "Home_json_insert.php?sql=" + sql, true);
+                else
+                    xmlhttp.open("GET", "Member_json.php?sql=" + sql, true);
+                //傳回資料位置
+
+                xmlhttp.send();
+            }
+            //================================================================================
+            //資料處裡============================================================
+            //step address
+            function obj_addr_fc(obj_addr) {
+                for (var i = 0; i < obj_addr.length; i++) {
+                    $("#Addr").append("<option value='" + obj_addr[i].Address_id + "'>" + obj_addr[i].Address_name + "</option>");
+                }
+            }
+            //step Floor
+            function obj_floor_fc(obj_floor) {
+                $("#floor_btn").find("button").remove();
+                for (var i = 0; i < obj_floor.length; i++) {
+                    //增加選單項目
+                    $("#floor_btn").append("<button id='F" + i + "'>" + obj_floor[i].Floor + "</button>");
+
+                }
+            }
+            //step Area
+            function obj_Area_fc(obj_Area) {
+                $("#area_btn").find("button").remove();
+                for (var i = 0; i < obj_Area.length; i++) {
+                    //增加選單項目
+                    $("#area_btn").append("<button id='" + obj_Area[i].Area_id + "'>" + obj_Area[i].Area_name + "</button>");
+
+                }
+            }
+            //step SubClass
+            function obj_SubClass_fc(obj_SubClass) {
+                $("#subclass_btn").find("button").remove();
+                for (var i = 0; i < obj_SubClass.length; i++) {
+                    $("#subclass_btn").append("<button id='" + obj_SubClass[i].SubClass_id + "' value='" + obj_SubClass[i].SubClass_id + "'>" + obj_SubClass[i].SubClass_name + "</button>");
+                }
+
+            }
+            //step Item
+            function obj_Item_fc(obj_Item) {
+                $("#item_btn").find("button").remove();
+                for (var i = 0; i < obj_Item.length; i++) {
+                    $("#item_btn").append("<button id='" + obj_Item[i].Item_id + "' value='" + obj_Item[i].Item_id + "'>" + obj_Item[i].Item_name + "</button>");
+                }
+            }
+            //step Type
+            function obj_Type_fc(obj_Type) {
+                $("#type_select").find("option").remove();
+                $("#type_select").append("<option value=''>選擇物品</option>");
+                for (var i = 0; i < obj_Type.length; i++) {
+                    $("#type_select").append("<option value='" + obj_Type[i].Type_id + "'>" + obj_Type[i].Type_name + "</option>");
+                }
+            }
+            //step login
+            function obj_login_fc(obj_login) {
+                //alert(obj_login[0].Account+" "+obj_login[0].PassWord);
+                if($("#password").val()==obj_login[0].PassWord){
+                    alert("登入成功")
+                    $("#login").show();
+                    $("#accpass").hide();
+                    
+                }else{
+                    alert("帳號或密碼錯誤")
+                }
+
+            }
+                             //================================================================================
+        </script>
+    </div>
+
+</body>
+
+</html>

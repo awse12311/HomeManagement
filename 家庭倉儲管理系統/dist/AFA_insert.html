@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>家庭倉儲管理系統</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js 讓 IE8 支援 HTML5 元素與媒體查詢 -->
+    <!-- 警告：Respond.js 無法在 file:// 協定下運作 -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script>
+        var addr_id_val;
+        var area_val;
+        $(document).ready(function () {
+            $(document).on('change', '#add_AFA', function () {
+                if ($(this).val() == 'Address_insert') {
+                    $("#select_address").hide();
+                    $("#insert_Address").show();
+                    $("#insert_Area").hide();
+                }
+                else if ($(this).val() == 'Area_insert') {
+                    $("#select_address").show();
+                    $("#insert_Address").hide();
+                    $("#insert_Area").show();
+                }
+
+            });
+            //地址事件
+            $(document).on('change', '#add_AFA', function () {
+
+                getAData('SELECT * FROM `Address`', 'get_address');
+
+            });
+            $(document).on("click", "#insert_address_button", function () {
+                addr_id_val = (addr_id_val.length > 9) ? 'addr0' + addr_id_val : 'addr00' + addr_id_val;
+                //alert(addr_id_val+" "+$("#Address_input").val()+" "+$("#Address_floor_input").val());
+                getAData("INSERT INTO `Address` (`Address_id`, `Address_name`, `Address_Floor`) VALUES ('" + addr_id_val + "', '" + $("#Address_input").val() + "', " + $("#Address_floor_input").val() + ")", 'insert');
+                $("#Address_input").val("");
+                $("#Address_floor_input").val("");
+                
+
+            });
+            //區域事件
+            $(document).on("change", "#Addr", function () {
+                console.log($(this).val() + $(this).find('option:selected').attr('id'));
+                $("#Floor_select").find("option").remove();
+                for (var i = 1; i <= $(this).val(); i++) {
+                    $("#Floor_select").append("<option value='F" + i + "' id='" + $(this).find('option:selected').attr('id') + "'>F" + i + "</option>");
+                }
+                //alert($("#Floor_select").val() + "  " + $(this).find('option:selected').attr('id'));
+                getAData("SELECT * FROM `Area` WHERE `Floor` = '" + $("#Floor_select").val() + "' AND `Address_id` = '" + $(this).find('option:selected').attr('id') + "'", 'get_area')
+            });
+
+            $(document).on("change", "#Floor_select", function () {
+                //alert($("#Floor_select").val() + "  " + $("#Addr").find('option:selected').attr('id'));
+
+                getAData("SELECT * FROM `Area` WHERE `Floor` = '" + $("#Floor_select").val() + "' AND `Address_id` = '" + $("#Addr").find('option:selected').attr('id') + "'", 'get_area')
+
+            });
+            $(document).on("click", "#insert_area_button", function () {
+                area_val+=1;
+                //alert($("#Floor_select").val()+"  A"+area_val+" "+$("#Area_input").val()+"  "+$("#Addr").find('option:selected').attr('id'));
+                if($("#Area_input").val()=='')
+                    alert('請輸入區域名');
+                else
+                    getAData("INSERT INTO `Area` (`Floor`, `Area_id`, `Area_name`, `Address_id`) VALUES ('" + $("#Floor_select").val() + "', 'A" + area_val + "', '"+$("#Area_input").val()+"', '" + $("#Addr").find('option:selected').attr('id') + "')", 'insert');
+                $("#Area_input").val("");
+
+
+            });
+        });
+    </script>
+
+</head>
+
+<body>
+    <!--header-->
+    <div class="container-fluid" id="header">
+        <div class="container">
+            <!--menu-->
+            <nav class="navbar navbar-default" role="navigation">
+                <div class="container-fluid">
+                    <!-- Brand and toggle get grouped for better mobile display -->
+                    <div class="navbar-header">
+                        <a class="navbar-brand" href="#">
+                            <div class="logo">家庭倉儲管理系統</div>
+                        </a>
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> 
+                            <span class="sr-only">Toggle navigation</span> 
+                            <span class="icon-bar"></span> 
+                            <span class="icon-bar"></span> 
+                            <span class="icon-bar"></span> 
+                        </button>
+
+                    </div>
+
+                    <!-- Collect the nav links, forms, and other content for toggling -->
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li><a href="index.html">首頁</a></li>
+                            <li><a href="CSIT_select.html">快速查詢</a></li>
+                            <li><a href="CSIT_insert.html">新增(管理者)</a></li>
+                            <li><a href="#">帳戶(管理者)</a></li>
+                            <li class="active"><a href="#">區域(區域管理者)</a></li>
+
+                        </ul>
+                    </div>
+                    <!-- /.navbar-collapse -->
+                </div>
+                <!-- /.container-fluid -->
+            </nav>
+            <!--menu end-->
+        </div>
+    </div>
+    <!--header end -->
+
+
+    <!--banner-->
+    <div class="container-fluid" id="banner">
+        <div class="container">
+
+            選擇新增目標:
+            <select name="AFA_select" id="add_AFA">
+                <option value="">選擇新增目標</option>
+                <option value="Address_insert">新增地址</option>
+                <option value="Area_insert">新增區域</option>
+            </select>
+            <div id="select_address" style="display:none">
+                選擇地址:
+                <select name="Addr_select" id="Addr"></select>
+            </div>
+
+        </div>
+    </div>
+    <!--banner end-->
+
+    <!--content-->
+    <div class="container-fluid">
+        <div class="container">
+            <div class="row">
+
+
+                <!--新增地址-->
+                <div class="col-sm-12 col-md-12" id="insert_Address" style="display:none">
+                    <div class="col-sm-12 col-md-6">
+                        <h2 style="color:#ddd;">新增地址</h2>
+                        <p>地址名稱:<input type="text" id="Address_input"></p>
+                        <p>樓層數:<input type="number" id="Address_floor_input" min="1" max="150"></p>
+                        <p><button id="insert_address_button">新增地址</button></p>
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <p>地址列表:</p>
+                        <select name="Address_text" id="Address_list" multiple="multiple" style="height:25vh;width:100%">
+                            
+                        </select>
+
+                    </div>
+                </div>
+
+                <!--新增區域-->
+                <div class="col-sm-12 col-md-12" id="insert_Area" style="display:none">
+                    <div class="col-sm-12 col-md-6">
+                        <h2 style="color:#ddd;">新增區域</h2>
+                        <p>
+                            樓層:
+                            <select name="Floor" id="Floor_select">
+                            </select>
+                        </p>
+                        <p>區域名:<input type="text" name="Area_name" id="Area_input"></p>
+                        <p><button id="insert_area_button">新增區域</button></p>
+                    </div>
+                    <div class="col-sm-12 col-md-6">
+                        <p>區域列表:</p>
+                        <select name="Area_text" id="Area_list" multiple="multiple" style="height:25vh;width:100%">
+                            
+                        </select>
+
+                    </div>
+                </div>
+
+
+
+
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+    <!--content end-->
+    <!--footer-->
+    <div class="container-fluid" id="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-md-2">
+                    123
+                </div>
+                <div class="col-xs-12 col-md-2">
+                    456
+                </div>
+                <div class="col-xs-12 col-md-2">
+                    789
+                </div>
+                <div class="col-xs-12 col-md-5 col-md-offset-1">
+                    <h1>1111</h1>
+                    <p>13579</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--footer end-->
+    <!-- jQuery (Bootstrap 所有外掛均需要使用) -->
+    <script src="js/jquery.min.js"></script>
+    <!-- 依需要參考已編譯外掛版本（如下），或各自獨立的外掛版本 -->
+    <script src="js/bootstrap.min.js"></script>
+    <script>
+        // //Ajax抓資料============================================================
+        function getAData(sql, step) {
+
+            var xmlhttp;
+            //判斷瀏覽器 選擇物件
+            if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+                xmlhttp = new XMLHttpRequest();
+            }
+            else {// code for IE6, IE5
+                xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            //開啟監聽 確認資料是否傳回
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    if (step != 'insert') {
+                        obj = JSON.parse(xmlhttp.responseText);
+                    }
+                    if (step == 'get_address') {
+                        obj_Address_fc(obj);
+                    }
+                    if (step == 'get_area') {
+                        obj_Area_fc(obj);
+                    }
+                    if (step == 'insert') {
+                        alert(xmlhttp.responseText);
+                        getAData('SELECT * FROM `Address`', 'get_address');
+                        getAData("SELECT * FROM `Area` WHERE `Floor` = '" + $("#Floor_select").val() + "' AND `Address_id` = '" + $("#Addr").find('option:selected').attr('id') + "'", 'get_area')
+
+                    }
+
+                }
+            }
+            if (step == 'insert') {
+                xmlhttp.open("GET", "Member_json_insert.php?sql=" + sql, true);
+            }
+            else
+                xmlhttp.open("GET", "Member_json.php?sql=" + sql, true);
+
+            //傳回資料位置
+            xmlhttp.send();
+        }
+        //================================================================================
+
+
+
+        //資料處裡===========================================================
+        //step Address
+        function obj_Address_fc(obj_address) {
+            $("#Address_list").find("option").remove();
+            for (var i = 0; i < obj_address.length; i++) {
+                $("#Address_list").append("<option value='" + obj_address[i].Address_id + "' id='" + obj_address[i].Address_id + "'>" + obj_address[i].Address_name + "  樓層數:" + obj_address[i].Address_Floor + "</option>");
+
+            }
+            addr_id_val = obj_address.length + 1;
+
+            $("#Addr").find("option").remove();
+            $("#Addr").append("<option value='選擇地址' id=''>選擇地址</option>");
+            for (var i = 0; i < obj_address.length; i++) {
+                $("#Addr").append("<option value='" + obj_address[i].Address_Floor + "' id='" + obj_address[i].Address_id + "'>" + obj_address[i].Address_name + "  樓層數:" + obj_address[i].Address_Floor + "</option>");
+                console.log(obj_address[i].Address_id);
+            }
+        }
+        function obj_Area_fc(obj_area) {
+            $("#Area_list").find("option").remove();
+            for (var i = 0; i < obj_area.length; i++) {
+                $("#Area_list").append("<option value='" + obj_area[i].Area_id + "' id='" + obj_area[i].Area_id + "'>" + obj_area[i].Area_id + obj_area[i].Area_name + "</option>");
+
+            }
+            area_val = obj_area.length;
+        }
+                                    //================================================================================
+    </script>
+</body>
+
+</html>

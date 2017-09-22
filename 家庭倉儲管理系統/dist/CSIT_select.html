@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>家庭倉儲管理系統</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js 讓 IE8 支援 HTML5 元素與媒體查詢 -->
+    <!-- 警告：Respond.js 無法在 file:// 協定下運作 -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script>
+		var showarray=new Array();
+		function rearray(){
+			for(var i=0;i<5;i++){
+				showarray[i]="";
+			}
+		
+		}
+		rearray();
+        $(document).ready(function () {
+			//選擇地址
+            $("#Addr").change(function(){
+				var sql = "SELECT DISTINCT Floor FROM `Area` WHERE Address_id ='" + $("#Addr").val() + "' order by Floor";
+				getAData(sql,'floor');
+				showarray[0]=" a.Address_id='"+$(this).val()+"'";
+			});
+			//選擇樓層
+			$("#Floor").change(function(){
+				var sql = "SELECT Area_id,Area_name FROM `Area` WHERE Address_id = '" + $("#Addr").val() + "' and Floor = '" + $(this).val() + "' ORDER by Area_id";
+				getAData(sql,'area');
+				showarray[1]=" a.Floor='"+$(this).val()+"'";
+			});
+			//選擇區域
+			$("#Area").change(function(){
+				showarray[2]=" a.Area='"+$(this).val()+"'";
+			});
+			//選擇等級
+			$("#Level").change(function(){
+				showarray[3]=" a.Level='"+$(this).val()+"'";
+			});
+			//輸入查詢
+			$("#keywd").change(function(){
+				showarray[4]=" c.Type_name LIKE '%"+$(this).val()+"%'";
+			});
+			//顯示方式
+			function selectway(way){
+				var sql,step;
+				var Today=new Date();
+				var nowdate=Today.getFullYear()+"-"+Today.getMonth()+"-"+Today.getDate();
+					if(showarray[0] == "" && showarray[1] == "" && showarray[2] == "" && showarray[3] == "" && showarray[4] == ""){
+						alert("請選擇至少一個篩選條件.");
+					}else{
+						var x=0; 
+						for(var i=0;i<5;i++){
+							if(showarray[i] != ""){
+								x++;
+								if(x>1){
+									showarray[i-1]+=" AND";
+								}
+							}
+						}
+						if(way == "all"){
+							sql="SELECT a.Floor,a.Area,e.Area_name,b.Address_name,b.Address_Floor,f.Class_id,g.Class_name,c.Type_name,a.Level,a.Entity_Expired,a.Entity_Remark From HomeManagementDB.Entity AS a LEFT OUTER JOIN MemberManagementDB.Address AS b USING (Address_id) LEFT OUTER JOIN HomeManagementDB.Type AS c USING (Type_id) LEFT OUTER JOIN HomeManagementDB.Item AS d USING (Item_id) LEFT OUTER JOIN MemberManagementDB.Area AS e ON a.Address_id=e.Address_id AND a.Area=e.Area_id AND a.Floor=e.Floor LEFT OUTER JOIN HomeManagementDB.SubClass AS f USING (SubClass_id) LEFT OUTER JOIN HomeManagementDB.Class AS g USING (Class_id) WHERE"+showarray[0]+showarray[1]+showarray[2]+showarray[3]+showarray[4]+" ORDER BY a.Entity_id";
+							
+							step="Allselect";
+							
+							$("#displayall").css("color","red");
+						}else if(way == "count"){
+							sql="SELECT h.id,h.Class_name,h.SubClass_name,h.Item_name,h.Type_name,COUNT(h.Type_name)AS count FROM (SELECT CONCAT(f.Class_id,'-',f.SubClass_id,'-',d.Item_id,'-',c.Type_id)AS id,g.Class_name,f.SubClass_name,d.Item_name,c.Type_name,a.Entity_Expired From HomeManagementDB.Entity AS a LEFT OUTER JOIN MemberManagementDB.Address AS b USING (Address_id) LEFT OUTER JOIN HomeManagementDB.Type AS c USING (Type_id) LEFT OUTER JOIN HomeManagementDB.Item AS d USING (Item_id) LEFT OUTER JOIN MemberManagementDB.Area AS e ON a.Address_id=e.Address_id AND a.Area=e.Area_id AND a.Floor=e.Floor LEFT OUTER JOIN HomeManagementDB.SubClass AS f USING (SubClass_id) LEFT OUTER JOIN HomeManagementDB.Class AS g USING (Class_id) WHERE"+showarray[0]+showarray[1]+showarray[2]+showarray[3]+showarray[4]+" ORDER BY a.Entity_id)AS h GROUP BY h.Type_name";
+						
+							step="Countselect";
+								
+							$("#displaycount").css("color","red");
+						}else{
+							sql="SELECT a.Floor,a.Area,e.Area_name,b.Address_name,b.Address_Floor,f.Class_id,g.Class_name,c.Type_name,a.Level,a.Entity_Expired,a.Entity_Remark From HomeManagementDB.Entity AS a LEFT OUTER JOIN MemberManagementDB.Address AS b USING (Address_id) LEFT OUTER JOIN HomeManagementDB.Type AS c USING (Type_id) LEFT OUTER JOIN HomeManagementDB.Item AS d USING (Item_id) LEFT OUTER JOIN MemberManagementDB.Area AS e ON a.Address_id=e.Address_id AND a.Area=e.Area_id AND a.Floor=e.Floor LEFT OUTER JOIN HomeManagementDB.SubClass AS f USING (SubClass_id) LEFT OUTER JOIN HomeManagementDB.Class AS g USING (Class_id) WHERE"+showarray[0]+showarray[1]+showarray[2]+showarray[3]+showarray[4]+" AND a.Entity_Expired < '"+nowdate+"' ORDER BY a.Entity_id";
+						
+							step="EXPselect";
+							
+							$("#displayEXP").css("color","red");
+						}
+					}
+				
+				//alert(sql);
+				getAData(sql,step);
+					
+				$("#Addr").val($("#Addr option:first").val());
+				$("#Floor>option:not(:first)").remove();
+				$("#Area>option:not(:first)").remove();
+				$("#Level").val($("#Level option:first").val());
+				$("#keywd").val("");
+				showarray=new Array();
+				rearray();
+				
+			}
+			//顯示方式全部
+			$("#displayall").click(function(){
+				selectway("all");
+				$("#displaycount").css("color","blue");
+				$("#displayEXP").css("color","blue");
+			});
+			//顯示方式總計
+			$("#displaycount").click(function(){
+				selectway("count");
+				$("#displayall").css("color","blue");
+				$("#displayEXP").css("color","blue");
+			});
+			//顯示方式過期
+			$("#displayEXP").click(function(){
+				selectway("EXP");
+				$("#displaycount").css("color","blue");
+				$("#displayall").css("color","blue");
+			});
+        });
+    </script>
+
+</head>
+
+<body onload="getAData('select * from Address','address')">
+    <!--header-->
+    <div class="container-fluid" id="header">
+        <div class="container">
+            <!--menu-->
+            <nav class="navbar navbar-default" role="navigation">
+                <div class="container-fluid">
+                    <!-- Brand and toggle get grouped for better mobile display -->
+                    <div class="navbar-header">
+                        <a class="navbar-brand" href="#">
+                            <div class="logo">家庭倉儲管理系統</div>
+                        </a>
+                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
+
+                    </div>
+
+                    <!-- Collect the nav links, forms, and other content for toggling -->
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li><a href="index.html">首頁</a></li>
+                            <li class="active"><a href="#">快速查詢</a></li>
+                            <li><a href="CSIT_insert.html">新增(管理者)</a></li>
+                            <li><a href="#">帳戶(管理者)</a></li>
+                            <li><a href="AFA_insert.html">區域(區域管理者)</a></li>
+                        </ul>
+                    </div>
+                    <!-- /.navbar-collapse -->
+                </div>
+                <!-- /.container-fluid -->
+            </nav>
+            <!--menu end-->
+        </div>
+    </div>
+    <!--header end -->
+
+
+    <!--banner-->
+    <div class="container-fluid" id="banner">
+        <div class="container">
+			<div class="row">
+				<div class="col-sm-6 col-md-3">
+					選擇地址:
+					<select name="Addr_select" id="Addr">
+						<option value="">選擇地址</option>
+					</select>
+				</div>
+				<div class="col-sm-6 col-md-2">
+					選擇樓層:
+					<br>
+					<select name="Floor_select" id="Floor">
+						<option value="">選擇樓層</option>
+					</select>
+				</div>
+				<div class="col-sm-6 col-md-2">
+					選擇區域:
+					<br>
+					<select name="Area_select" id="Area">
+						<option value="">選擇區域</option>
+					</select>
+				</div>
+				<div class="col-sm-6 col-md-3">
+					物品關鍵字:
+					<br>
+					<input type="text" id="keywd" style="display:inline;"/>
+				</div>
+				<div class="col-sm-6 col-md-2">
+					選擇等級:
+					<br>
+					<select name="Level_select" id="Level">
+						<option value="">選擇等級</option>
+						<option>A</option>
+						<option>B</option>
+						<option>C</option>
+						<option>D</option>
+					</select>
+				</div>
+			</div>
+        </div>
+    </div>
+    <!--banner end-->
+
+    <!--content-->
+    <div class="container-fluid">
+        <div class="container">
+			<div class="oncenter">
+				<div style="white-space: nowrap;">
+				顯示方式:
+				<a id="displayall">全部</a>
+				<a id="displaycount">總計</a>
+				<a id="displayEXP">過期</a>
+				</div>
+			</div>
+            <div class="row" id="Content">
+
+
+                
+
+            </div>
+        </div>
+    </div>
+    <!--content end-->
+    <!--footer-->
+    <div class="container-fluid" id="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-md-2">
+                    123
+                </div>
+                <div class="col-xs-12 col-md-2">
+                    456
+                </div>
+                <div class="col-xs-12 col-md-2">
+                    789
+                </div>
+                <div class="col-xs-12 col-md-5 col-md-offset-1">
+                    <h1>1111</h1>
+                    <p>13579</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--footer end-->
+    <!-- jQuery (Bootstrap 所有外掛均需要使用) -->
+    <script src="js/jquery.min.js"></script>
+    <!-- 依需要參考已編譯外掛版本（如下），或各自獨立的外掛版本 -->
+    <script src="js/bootstrap.min.js"></script>
+    <script>
+        // //Ajax抓資料============================================================
+        function getAData(sql, step) {
+
+            var xmlhttp;
+            //判斷瀏覽器 選擇物件
+            if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+                xmlhttp = new XMLHttpRequest();
+            }
+            else {// code for IE6, IE5
+                xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            //開啟監聽 確認資料是否傳回
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+					var obj = JSON.parse(xmlhttp.responseText);
+                   if (step == 'address') {
+                        obj_addr_fc(obj);
+					}else if(step == 'floor'){
+						obj_floor_fc(obj);
+					}else if(step == 'area'){
+						obj_area_fc(obj);
+					}else if(step == 'Allselect'){
+						obj_allselect_fc(obj);
+					}else if(step == 'Countselect'){
+						obj_countselect_fc(obj);
+					}else if(step == 'EXPselect'){
+						obj_EXPselect_fc(obj);
+					}
+                }
+            }
+			if(step == 'Allselect' || step == 'EXPselect' || step == 'Countselect'){
+				xmlhttp.open("GET", "openalldb.php?sql=" + sql, true);
+			}else{
+				xmlhttp.open("GET", "Member_json.php?sql=" + sql, true);
+			}
+
+            //傳回資料位置
+            xmlhttp.send();
+        }
+        //================================================================================
+        //資料處裡============================================================
+		//地址
+		function obj_addr_fc(obj_addr) {
+            for (var i = 0; i < obj_addr.length; i++) {
+                $("#Addr").append("<option value='"+obj_addr[i].Address_id+"'>"+obj_addr[i].Address_name+"</option>");
+            }
+        }
+		//樓層
+		function obj_floor_fc(obj_floor) {
+			$("#Floor>option:not(:first)").remove();
+            for (var i = 0; i < obj_floor.length; i++) {
+                $("#Floor").append("<option>"+obj_floor[i].Floor+"</option>");
+            }
+        }
+		//區域
+		function obj_area_fc(obj_area) {
+			$("#Area>option:not(:first)").remove();
+            for (var i = 0; i < obj_area.length; i++) {
+                $("#Area").append("<option value='"+obj_area[i].Area_id+"'>"+obj_area[i].Area_name+"</option>");
+            }
+        }
+		//全部查詢
+		function obj_allselect_fc(obj_all) {
+			$("#Content>div").remove();
+            for (var i = 0; i < obj_all.length; i++) {
+                $("#Content").append("<div class='col-sm-6 col-md-4'><div id='mydes'><h1>"+obj_all[i].Type_name+"</h1><p>位置:"+obj_all[i].Floor+","+obj_all[i].Area+"</p><p>區域名:"+obj_all[i].Area_name+"</p><p>地址:"+obj_all[i].Address_name+"</p><p>樓層數:"+obj_all[i].Address_Floor+"</p><p>類別:"+obj_all[i].Class_id+" "+obj_all[i].Class_name+"</p><p>等級:"+obj_all[i].Level+"</p><p>備註:"+obj_all[i].Entity_Remark+"</p><p>過期日:"+obj_all[i].Entity_Expired+"</p></div></div>");
+            }
+        }
+		//過期查詢
+		function obj_EXPselect_fc(obj_exp) {
+			$("#Content>div").remove();
+            for (var i = 0; i < obj_exp.length; i++) {
+                $("#Content").append("<div class='col-sm-6 col-md-4'><div id='mydes'><h1>"+obj_exp[i].Type_name+"</h1><p style='color:purple;'>過期日:"+obj_exp[i].Entity_Expired+"</p><p>位置:"+obj_exp[i].Floor+","+obj_exp[i].Area+"</p><p>區域名:"+obj_exp[i].Area_name+"</p><p>地址:"+obj_exp[i].Address_name+"</p><p>樓層數:"+obj_exp[i].Address_Floor+"</p><p>類別:"+obj_exp[i].Class_id+" "+obj_exp[i].Class_name+"</p><p>等級:"+obj_exp[i].Level+"</p><p>備註:"+obj_exp[i].Entity_Remark+"</p></div></div>");
+            }
+        }
+		//總計查詢
+		function obj_countselect_fc(obj_count) {
+			$("#Content>div").remove();
+            for (var i = 0; i < obj_count.length; i++) {
+                $("#Content").append("<div class='col-sm-6 col-md-12'><div id='mydes'><h1>"+obj_count[i].Type_name+"</h1><p>代號:"+obj_count[i].id+"</p><p>類別:"+obj_count[i].Class_name+"</p><p>子類別:"+obj_count[i].SubClass_name+"</p><p>項目:"+obj_count[i].Item_name+"</p><p>總計:"+obj_count[i].count+"</p></div></div>");
+            }
+        }
+                                    //================================================================================
+    </script>
+</body>
+
+</html>

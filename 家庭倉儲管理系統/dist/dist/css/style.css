@@ -1,0 +1,61 @@
+@charset "utf-8";
+#header {
+	background:#6FF;
+}
+#header>.container{
+	padding:30px 0 20px;/*內聚 上 左 下*/
+}
+nav{
+	font-size:1.4em;
+}
+.logo{
+	font-size:2em;
+	color:#000;
+	padding:30px 0;
+	
+}
+#banner{
+	background:#6CC;
+	padding:30px 0;
+}
+ul{
+	padding:0;}
+li{
+	list-style-type:none;
+	border-bottom::1px solid #ced0b7;
+}
+#footer{
+	width:100%;
+	min-height:50px;
+	margin:0 auto;
+	background-color:#000;
+	position: relative;
+	color:#fff;
+	text-align:center;
+	line-height:50px;
+}
+@media screen and (max-width: 990px){
+	.logo{
+	font-size:2em;
+	color:#000;
+	padding:30px 0;
+	
+}
+	.navbar-nav>li>a {
+		font-size:0.75em;
+	}
+}
+@media screen and (max-width: 768px){
+	.logo{
+	font-size:2em;
+	color:#000;
+	padding:15px 0;
+	
+}
+	.navbar-nav>li>a {
+		font-size:0.75em;
+	}
+	#banner{
+		display:none;
+	}
+}
